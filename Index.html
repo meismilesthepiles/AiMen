@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Assistant - Infinite Replies</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .setup-screen {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .setup-screen h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .setup-screen p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .name-input, .api-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .api-section {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #9ec5fe;
+        }
+
+        .api-section h3 {
+            color: #004085;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .api-section p {
+            color: #004085;
+            font-size: 0.9em;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .api-section small {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .api-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .btn-permission {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .btn-permission:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .main-interface {
+            display: none;
+        }
+
+        .wake-word-display {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .wake-word-display h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .wake-word-display .name {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .wake-word-display .ai-mode {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .wake-word-display .change-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+
+        .wake-word-display .change-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .status.listening {
+            background: #d4edda;
+            color: #155724;
+            animation: pulse 1.5s infinite;
+            border-color: #c3e6cb;
+        }
+
+        .status.wake-listening {
+            background: #cfe2ff;
+            color: #084298;
+            animation: pulse 1.5s infinite;
+            border-color: #9ec5fe;
+        }
+
+        .status.speaking {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffeaa7;
+        }
+
+        .status.thinking {
+            background: #e7e7ff;
+            color: #4a4a9e;
+            border-color: #d0d0ff;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .mic-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: #667eea;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .mic-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .mic-button:active {
+            transform: scale(0.95);
+        }
+
+        .mic-button.listening {
+            background: #f093fb;
+            animation: pulse-button 1s infinite;
+        }
+
+        .mic-button.wake-mode {
+            background: #4facfe;
+        }
+
+        @keyframes pulse-button {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .transcript {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+        }
+
+        .transcript-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-speech {
+            background: #e3f2fd;
+            text-align: right;
+            border: 1px solid #bbdefb;
+        }
+
+        .ai-response {
+            background: #f3e5f5;
+            text-align: left;
+            border: 1px solid #e1bee7;
+        }
+
+        .label {
+            font-weight: bold;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-clear {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #ee5a52;
+        }
+
+        .btn-test {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-test:hover {
+            background: #45a049;
+        }
+
+        .btn-wake {
+            background: #00b4d8;
+            color: white;
+        }
+
+        .btn-wake:hover {
+            background: #0096c7;
+        }
+
+        .btn-wake.active {
+            background: #f093fb;
+        }
+
+        .btn-settings {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-settings:hover {
+            background: #5a6268;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+            border: 1px solid #c3e6cb;
+        }
+
+        .quick-commands {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .quick-commands h3 {
+            color: #333;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .quick-commands ul {
+            list-style: none;
+            color: #666;
+        }
+
+        .quick-commands li {
+            padding: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .quick-commands li:before {
+            content: "• ";
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .info-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #856404;
+            font-size: 0.9em;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-box a {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Voice AI Assistant</h1>
+        
+        <!-- Setup Screen -->
+        <div class="setup-screen" id="setupScreen">
+            <h2>Setup Your AI Assistant</h2>
+            <p>Give your assistant a name and configure AI capabilities.</p>
+            
+            <input type="text" class="name-input" id="nameInput" placeholder="Enter assistant name (e.g., Jarvis)" value="Jarvis">
+            
+            <div class="api-section">
+                <h3>AI Brain (Optional but Recommended)</h3>
+                <p>Connect to OpenAI for unlimited intelligent responses!</p>
+                
+                <div class="checkbox-container" style="justify-content: center; margin: 15px 0;">
+                    <input type="checkbox" id="useAICheckbox">
+                    <label for="useAICheckbox">Enable Advanced AI (OpenAI GPT)</label>
+                </div>
+                
+                <div id="apiInputSection" style="display: none;">
+                    <input type="password" class="api-input" id="apiKeyInput" placeholder="Enter your OpenAI API Key">
+                    <small>Your API key is stored locally and never shared.</small>
+                </div>
+                
+                <div class="info-box">
+                    <h4>How to get an API Key:</h4>
+                    <p>1. Go to <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a></p>
+                    <p>2. Sign up or log in</p>
+                    <p>3. Click "Create new secret key"</p>
+                    <p>4. Copy and paste it above</p>
+                    <p><strong>Note:</strong> Without an API key, the assistant will use basic pre-programmed responses.</p>
+                </div>
+            </div>
+            
+            <button class="btn-permission" onclick="startSetup()">Setup Assistant</button>
+            <button class="btn-permission btn-secondary" onclick="skipAISetup()">Skip AI (Use Basic Mode)</button>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="main-interface" id="mainInterface">
+            <div class="wake-word-display">
+                <h2>Your Assistant:</h2>
+                <div class="name" id="displayName">Jarvis</div>
+                <p>Say "<span id="wakePhrase">Hey Jarvis</span>" to activate</p>
+                <div class="ai-mode" id="aiModeDisplay">Mode: Basic Responses</div>
+                <button class="change-btn" onclick="changeName()">Change Name</button>
+                <button class="change-btn" onclick="showSettings()">AI Settings</button>
+            </div>
+
+            <div class="status" id="status">Ready</div>
+            
+            <div class="error" id="error"></div>
+            <div class="success" id="success"></div>
+            
+            <button class="mic-button" id="micButton">MIC</button>
+            
+            <div class="transcript" id="transcript">
+                <div style="text-align: center; color: #999;">Say your wake word or click the button...</div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-wake" id="wakeButton" onclick="toggleWakeWord()">Enable Wake Word</button>
+                <button class="btn btn-test" onclick="testSpeech()">Test Speaker</button>
+                <button class="btn btn-clear" onclick="clearTranscript()">Clear History</button>
+            </div>
+
+            <div class="quick-commands">
+                <h3>Try saying:</h3>
+                <ul>
+                    <li>"<span class="wake-word-example">Hey Jarvis</span>, what time is it?"</li>
+                    <li>"<span class="wake-word-example">Hey Jarvis</span>, tell me about quantum physics"</li>
+                    <li>"<span class="wake-word-example">Hey Jarvis</span>, write me a poem"</li>
+                    <li>"<span class="wake-word-example">Hey Jarvis</span>, help me solve a problem"</li>
+                    <li>Ask anything - if AI is enabled, I can answer!</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let recognition;
+        let isListening = false;
+        let isSpeaking = false;
+        let wakeWordEnabled = false;
+        let assistantName = 'Jarvis';
+        let isSetupComplete = false;
+        let micPermissionGranted = true;
+        
+        // AI Configuration
+        let useAI = false;
+        let openaiApiKey = '';
+        let conversationHistory = [];
+        
+        const transcriptDiv = document.getElementById('transcript');
+        const statusDiv = document.getElementById('status');
+        const micButton = document.getElementById('micButton');
+        const errorDiv = document.getElementById('error');
+        const successDiv = document.getElementById('success');
+        const setupScreen = document.getElementById('setupScreen');
+        const mainInterface = document.getElementById('mainInterface');
+        const wakeButton = document.getElementById('wakeButton');
+        const useAICheckbox = document.getElementById('useAICheckbox');
+        const apiInputSection = document.getElementById('apiInputSection');
+
+        // Toggle API input visibility
+        useAICheckbox.addEventListener('change', () => {
+            apiInputSection.style.display = useAICheckbox.checked ? 'block' : 'none';
+        });
+
+        // Skip AI setup
+        function skipAISetup() {
+            useAICheckbox.checked = false;
+            startSetup();
+        }
+
+        // Start setup
+        async function startSetup() {
+            const nameInput = document.getElementById('nameInput').value.trim();
+            
+            if (!nameInput) {
+                alert('Please enter a name for your assistant!');
+                return;
+            }
+
+            assistantName = nameInput;
+            
+            // Check if AI is enabled
+            if (useAICheckbox.checked) {
+                const apiKey = document.getElementById('apiKeyInput').value.trim();
+                if (!apiKey) {
+                    alert('Please enter your OpenAI API key or uncheck the AI option.');
+                    return;
+                }
+                useAI = true;
+                openaiApiKey = apiKey;
+            }
+            
+            try {
+                if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                    alert('Your browser does not support voice recognition.\n\nPlease use:\n- Google Chrome\n- Microsoft Edge\n- Safari (on Mac/iOS)');
+                    return;
+                }
+
+                if (!micPermissionGranted) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        stream.getTracks().forEach(track => track.stop());
+                        micPermissionGranted = true;
+                    } catch (e) {
+                        throw e;
+                    }
+                }
+                
+                setupScreen.style.display = 'none';
+                mainInterface.style.display = 'block';
+                
+                document.getElementById('displayName').textContent = assistantName;
+                document.getElementById('wakePhrase').textContent = `Hey ${assistantName}`;
+                
+                const modeText = useAI ? 'Mode: Advanced AI (GPT-4)' : 'Mode: Basic Responses';
+                document.getElementById('aiModeDisplay').textContent = modeText;
+                
+                const examples = document.querySelectorAll('.wake-word-example');
+                examples.forEach(el => el.textContent = `Hey ${assistantName}`);
+                
+                if (!isSetupComplete) {
+                    initSpeechRecognition();
+                    isSetupComplete = true;
+                }
+                
+                const setupMsg = useAI 
+                    ? `${assistantName} is ready with advanced AI! Ask me anything!`
+                    : `${assistantName} is ready with basic responses. Enable AI for unlimited answers.`;
+                showSuccess(setupMsg);
+                
+            } catch (error) {
+                if (error.name === 'NotAllowedError') {
+                    alert('Microphone access denied. Please allow microphone access and try again.');
+                } else {
+                    alert('Error: ' + error.message);
+                }
+            }
+        }
+
+        // Show settings
+        function showSettings() {
+            setupScreen.style.display = 'block';
+            mainInterface.style.display = 'none';
+            
+            if (useAI) {
+                useAICheckbox.checked = true;
+                apiInputSection.style.display = 'block';
+                document.getElementById('apiKeyInput').value = openaiApiKey;
+            }
+        }
+
+        // Change assistant name
+        function changeName() {
+            const newName = prompt(`Enter new name for your assistant:`, assistantName);
+            if (newName && newName.trim()) {
+                assistantName = newName.trim();
+                document.getElementById('displayName').textContent = assistantName;
+                document.getElementById('wakePhrase').textContent = `Hey ${assistantName}`;
+                
+                const examples = document.querySelectorAll('.wake-word-example');
+                examples.forEach(el => el.textContent = `Hey ${assistantName}`);
+                
+                showSuccess(`Assistant name changed to ${assistantName}!`);
+                
+                if (wakeWordEnabled) {
+                    stopWakeWord();
+                    setTimeout(() => startWakeWord(), 500);
+                }
+            }
+        }
+
+        // Toggle wake word
+        function toggleWakeWord() {
+            if (wakeWordEnabled) {
+                stopWakeWord();
+            } else {
+                startWakeWord();
+            }
+        }
+
+        // Start wake word listening
+        function startWakeWord() {
+            wakeWordEnabled = true;
+            wakeButton.textContent = 'Disable Wake Word';
+            wakeButton.classList.add('active');
+            micButton.classList.add('wake-mode');
+            
+            statusDiv.textContent = `Listening for "Hey ${assistantName}"...`;
+            statusDiv.className = 'status wake-listening';
+            
+            startContinuousListening();
+            showSuccess(`Wake word enabled! Say "Hey ${assistantName}" to activate.`);
+        }
+
+        // Stop wake word listening
+        function stopWakeWord() {
+            wakeWordEnabled = false;
+            wakeButton.textContent = 'Enable Wake Word';
+            wakeButton.classList.remove('active');
+            micButton.classList.remove('wake-mode');
+            
+            if (recognition && isListening) {
+                recognition.stop();
+            }
+            
+            statusDiv.textContent = 'Ready';
+            statusDiv.className = 'status';
+        }
+
+        // Continuous listening for wake word
+        function startContinuousListening() {
+            if (!wakeWordEnabled || isListening) return;
+            
+            try {
+                recognition.start();
+            } catch (error) {
+                console.log('Recognition already started');
+            }
+        }
+
+        // Initialize Speech Recognition
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isListening = true;
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                if (wakeWordEnabled && !isSpeaking) {
+                    setTimeout(() => startContinuousListening(), 500);
+                }
+            };
+
+            recognition.onresult = (event) => {
+                const last = event.results.length - 1;
+                const transcript = event.results[last][0].transcript.toLowerCase();
+                console.log('Heard:', transcript);
+                
+                if (wakeWordEnabled) {
+                    const wakeWords = [
+                        `hey ${assistantName.toLowerCase()}`,
+                        `hi ${assistantName.toLowerCase()}`,
+                        `hello ${assistantName.toLowerCase()}`,
+                        assistantName.toLowerCase()
+                    ];
+                    
+                    const hasWakeWord = wakeWords.some(word => transcript.includes(word));
+                    
+                    if (hasWakeWord) {
+                        statusDiv.textContent = 'Wake word detected! Listening...';
+                        statusDiv.className = 'status listening';
+                        micButton.classList.add('listening');
+                        
+                        const cleanTranscript = transcript
+                            .replace(/hey /gi, '')
+                            .replace(/hi /gi, '')
+                            .replace(/hello /gi, '')
+                            .replace(new RegExp(assistantName, 'gi'), '')
+                            .trim();
+                        
+                        if (cleanTranscript) {
+                            addToTranscript('user', cleanTranscript);
+                            processCommand(cleanTranscript);
+                        } else {
+                            speak(`Yes, I'm listening!`);
+                        }
+                        
+                        setTimeout(() => {
+                            micButton.classList.remove('listening');
+                            if (wakeWordEnabled) {
+                                statusDiv.textContent = `Listening for "Hey ${assistantName}"...`;
+                                statusDiv.className = 'status wake-listening';
+                            }
+                        }, 2000);
+                    }
+                } else {
+                    addToTranscript('user', transcript);
+                    processCommand(transcript);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                if (event.error === 'no-speech' && wakeWordEnabled) {
+                    return;
+                }
+                
+                console.error('Recognition error:', event.error);
+                isListening = false;
+                
+                if (wakeWordEnabled) {
+                    setTimeout(() => startContinuousListening(), 1000);
+                }
+            };
+        }
+
+        // Manual mic button
+        micButton.addEventListener('click', () => {
+            if (wakeWordEnabled) {
+                showError('Wake word mode is active. Disable it to use manual button.');
+                return;
+            }
+            
+            if (!recognition) {
+                showError('Please complete setup first.');
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+                micButton.classList.remove('listening');
+                statusDiv.textContent = 'Ready';
+                statusDiv.className = 'status';
+            } else {
+                try {
+                    hideMessages();
+                    recognition.continuous = false;
+                    recognition.start();
+                    micButton.classList.add('listening');
+                    statusDiv.textContent = 'Listening...';
+                    statusDiv.className = 'status listening';
+                } catch (error) {
+                    showError('Error: ' + error.message);
+                }
+            }
+        });
+
+        // Process command with AI or basic responses
+        async function processCommand(text) {
+            if (useAI && openaiApiKey) {
+                await getAIResponse(text);
+            } else {
+                const response = getBasicResponse(text);
+                addToTranscript('ai', response);
+                speak(response);
+            }
+        }
+
+        // Get AI response from OpenAI
+        async function getAIResponse(userMessage) {
+            statusDiv.textContent = 'Thinking...';
+            statusDiv.className = 'status thinking';
+            
+            conversationHistory.push({
+                role: 'user',
+                content: userMessage
+            });
+            
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${openaiApiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4o-mini',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: `You are ${assistantName}, a helpful voice assistant. Keep responses concise (2-3 sentences) unless asked for more detail. Be friendly and conversational.`
+                            },
+                            ...conversationHistory
+                        ],
+                        max_tokens: 150,
+                        temperature: 0.7
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error?.message || 'API request failed');
+                }
+                
+                const data = await response.json();
+                const assistantMessage = data.choices[0].message.content;
+                
+                conversationHistory.push({
+                    role: 'assistant',
+                    content: assistantMessage
+                });
+                
+                // Keep conversation history manageable
+                if (conversationHistory.length > 10) {
+                    conversationHistory = conversationHistory.slice(-10);
+                }
+                
+                addToTranscript('ai', assistantMessage);
+                speak(assistantMessage);
+                
+            } catch (error) {
+                console.error('AI Error:', error);
+                const fallbackResponse = `I'm having trouble connecting to my AI brain. ${getBasicResponse(userMessage)}`;
+                addToTranscript('ai', fallbackResponse);
+                speak(fallbackResponse);
+                showError('AI connection issue: ' + error.message);
+            }
+        }
+
+        // Basic responses (fallback)
+        function getBasicResponse(input) {
+            input = input.toLowerCase();
+            
+            if (input.includes('hello') || input.includes('hi') || input.includes('hey')) {
+                return `Hello! I'm ${assistantName}. How can I help you?`;
+            } else if (input.includes('how are you')) {
+                return 'I am doing great! Thank you for asking. How can I help you?';
+            } else if (input.includes('time')) {
+                return 'The current time is ' + new Date().toLocaleTimeString();
+            } else if (input.includes('date') || input.includes('day')) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return 'Today is ' + new Date().toLocaleDateString('en-US', options);
+            } else if (input.includes('weather')) {
+                return 'I cannot check the weather right now. Enable AI mode for real-time information!';
+            } else if (input.includes('your name') || input.includes('who are you')) {
+                return `I am ${assistantName}, your voice assistant!`;
+            } else if (input.includes('thank')) {
+                return 'You are very welcome! Happy to help!';
+            } else if (input.includes('joke')) {
+                const jokes = [
+                    'Why did the programmer quit? Because he did not get arrays!',
+                    'Why do programmers prefer dark mode? Because light attracts bugs!',
+                    'What is a computer\'s favorite snack? Microchips!'
+                ];
+                return jokes[Math.floor(Math.random() * jokes.length)];
+            } else if (input.includes('help')) {
+                return `Just say Hey ${assistantName} followed by your question. Enable AI mode in settings for unlimited answers!`;
+            } else {
+                return 'I can answer that better with AI enabled. Go to settings to add your OpenAI API key for unlimited intelligent responses!';
+            }
+        }
+
+        // Text-to-speech
+        function speak(text) {
+            if (!('speechSynthesis' in window)) {
+                return;
+            }
+
+            isSpeaking = true;
+            if (!wakeWordEnabled) {
+                statusDiv.textContent = 'Speaking...';
+                statusDiv.className = 'status speaking';
+            }
+
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            
+            utterance.onend = () => {
+                isSpeaking = false;
+                if (wakeWordEnabled) {
+                    statusDiv.textContent = `Listening for "Hey ${assistantName}"...`;
+                    statusDiv.className = 'status wake-listening';
+                } else {
+                    statusDiv.textContent = 'Ready';
+                    statusDiv.className = 'status';
+                }
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Test speech
+        function testSpeech() {
+            speak(`Hello! I am ${assistantName}, your voice assistant. Everything is working perfectly!`);
+        }
+
+        // Add to transcript
+        function addToTranscript(type, text) {
+            const item = document.createElement('div');
+            item.className = 'transcript-item ' + (type === 'user' ? 'user-speech' : 'ai-response');
+            
+            const label = document.createElement('div');
+            label.className = 'label';
+            label.textContent = type === 'user' ? 'You:' : `${assistantName}:`;
+            
+            const content = document.createElement('div');
+            content.textContent = text;
+            
+            item.appendChild(label);
+            item.appendChild(content);
+            
+            if (transcriptDiv.children.length === 1 && transcriptDiv.children[0].style.textAlign === 'center') {
+                transcriptDiv.innerHTML = '';
+            }
+            
+            transcriptDiv.appendChild(item);
+            transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+        }
+
+        // Clear transcript
+        function clearTranscript() {
+            transcriptDiv.innerHTML = '<div style="text-align: center; color: #999;">Say your wake word or click the button...</div>';
+            conversationHistory = [];
+        }
+
+        // Messages
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            setTimeout(() => successDiv.style.display = 'none', 5000);
+        }
+
+        function hideMessages() {
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
